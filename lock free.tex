@@ -1,12 +1,33 @@
 \documentclass{article}
 \usepackage[english,russian]{babel}
 \usepackage[utf8]{inputenc}
-\usepackage{graphicx}
 \usepackage{amsmath}
-\usepackage{natbib}
+\usepackage[numbers]{natbib}
 \usepackage{graphicx}
+\usepackage{color}
 \usepackage{listings}
 \usepackage{hyperref}
+
+\lstset{
+  basicstyle={\small},
+  breaklines=true,
+  language={[Sharp]C},
+  showstringspaces=false,
+  tabsize=4,
+  escapeinside={\%*}{*)},            % if you want to add LaTeX within your code
+  keywordstyle=\color[rgb]{0,0,1},
+  commentstyle=\color[rgb]{0.133,0.545,0.133},
+  stringstyle=\color[rgb]{0.627,0.126,0.941}
+}
+\lstset{morekeywords={var}}
+
+
+%%% Списки %%%
+\newenvironment{itemize*}%
+               {\begin{itemize}%
+                   \setlength{\itemsep}{1pt}%
+                   \setlength{\parskip}{1pt}}%
+               {\end{itemize}}
 
 \title{Неблокирующая синхронизация}
 \author{Скомпоновал доклад Евгений}
@@ -15,6 +36,7 @@
 \begin{document}
 
 \maketitle
+\newpage
 
 \section{Введение}
 
@@ -60,8 +82,8 @@ comparand - значение, с которым сравнивается \\
 Любой современный процессор может переставлять инструкции чтения и записи памяти в целях оптимизации. Поясню это на примере.
 
 \begin{lstlisting}
-int a = _a;
-_b = 10;
+  int a = _a;
+  _b = 10;
 \end{lstlisting}
 
 В данном коде вначале читается переменная \_a, затем записывается \_b. Но при исполнении данной программы процессор может переставить местами инструкции чтения и записи, то есть вначале будет записана переменная \_b, и только потом прочтена \_a. Для однопоточной программы такая перестановка не имеет значения, но для многопоточной программы это может превратиться в проблему. Сейчас мы рассмотрели перестановку загрузка – запись. Аналогичные перестановки возможны и для других сочетаний инструкций.\\
@@ -88,6 +110,8 @@ Acquire fence гарантирует что инструкции, стоящие
 Release fence гарантирует, что инструкции, стоящие до барьера, не будут перемещены в позицию после барьера.\\
 
 Еще пару слов о терминологии. Термин volatile write означает выполнение записи в память в сочетании с созданием release fence. Термин volatile read означает чтение памяти в сочетании с созданием acquire fence.
+
+\newpage
 
 \section{Проблемы при распараллеливании}
 \subsection{ABA-проблема}
@@ -188,6 +212,7 @@ class ReorderTest2
 
 Является ли данный код корректным, то есть, можем ли мы с уверенностью сказать, что программа никогда не выведет нуль? Если бы речь шла об однопоточных программах, то для проверки этого кода было бы достаточно единожды запустить его на выполнение. Но, так как мы имеем дело с многопоточностью, этого недостаточно. 
 
+\newpage
 
 \begin{thebibliography}{9}
 \bibitem{ref1} \href{https://habr.com/ru/post/195948/}{Lock-free структуры данных. Основы: Атомарность и атомарные примитивы / Хабр}
@@ -195,6 +220,7 @@ class ReorderTest2
 \bibitem{ref3} \href{https://afana.me/archive/2015/07/10/memory-barriers-in-dot-net.aspx/}{Memory Barriers in .NET · Nadeem Afana's Blog}
 \bibitem{ref4} \href{https://ru.wikipedia.org/wiki/%D0%9F%D1%80%D0%BE%D0%B1%D0%BB%D0%B5%D0%BC%D0%B0_ABA}{Проблема ABA — Википедия}
 \bibitem{ref5} \href{https://habr.com/ru/post/130318/}{Барьеры памяти и неблокирующая синхронизация в .NET / Хабр}
-\bibitem{ref62} \href{https://docs.microsoft.com/ru-ru/dotnet/csharp/language-reference/keywords/volatile}{Справочник по C#. volatile | Microsoft Docs}
+\bibitem{ref62} \href{https://docs.microsoft.com/ru-ru/dotnet/csharp/language-reference/keywords/volatile}{Справочник по C\#. volatile | Microsoft Docs}
 \end{thebibliography}
+
 \end{document}
